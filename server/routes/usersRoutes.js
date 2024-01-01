@@ -1,5 +1,5 @@
-const { register, login } = require("../controllers/usersController")
 // menit ke 1.21
+const { register, login } = require("../controllers/usersController")
 const router = require("express").Router()
 
 router.post("/register", register);
