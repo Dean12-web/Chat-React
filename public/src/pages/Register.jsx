@@ -24,6 +24,14 @@ function Register() {
         theme: 'dark',
     };
 
+    useEffect(() => {
+        // digunakan untuk agar user ketika sudah login tidak bisa
+        // redirect lagi ke halaman login
+        if (localStorage.getItem('chat-app-user')) {
+            navigate('/')
+        }
+    }, [])
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         // validasi login, jika ada error return false, jika tidak ada call api

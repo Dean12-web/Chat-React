@@ -22,6 +22,14 @@ function Login() {
         theme: 'dark',
     };
 
+    useEffect(() => {
+        // digunakan untuk agar user ketika sudah login tidak bisa
+        // redirect lagi ke halaman login
+        if (localStorage.getItem('chat-app-user')) {
+            navigate('/')
+        }
+    }, [])
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         // validasi login, jika ada error return false, jika tidak ada call api
@@ -35,6 +43,8 @@ function Login() {
             if (data.status === false) {
                 toast.error(data.msg, toastOptions);
             }
+            // digunakan untuk ketika data user sesuai
+            // redirect ke halaman chat
             if (data.status === true) {
                 localStorage.setItem('chat-app-user', JSON.stringify(data.user));
                 navigate("/");
