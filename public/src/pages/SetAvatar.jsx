@@ -1,4 +1,4 @@
-//menit ke 1.39.57
+//Menit Ke 1.54.17
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,7 +22,37 @@ export default function SetAvatar() {
         draggable: true,
         theme: 'dark',
     };
-    const setProfilePicture = async () => { }
+
+    useEffect(() => {
+        //jika tidak ada data user di local storage
+        //navigasi ke halaman
+        if (!localStorage.getItem('chat-app-user')) {
+            navigate('/login')
+        }
+    }, []);
+
+    const setProfilePicture = async () => {
+        //Validasi Avatar
+        if (selectedAvatar === undefined) {
+            toast.error("Please select an avatar", toastOptions)
+        } else {
+            //key didapat dari Login page, untuk mendapatkan user
+            //memilih avatar untuk user
+            const user = await JSON.parse(localStorage.getItem("chat-app-user"))
+            const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
+                image: avatars[selectedAvatar],
+            })
+            console.log(data)
+            if (data.isSet) {
+                user.isAvatarImageSet = true;
+                user.avatarImage = data.image;
+                localStorage.setItem('chat-app-user', JSON.stringify(user))
+                navigate('/')
+            } else {
+                toast.error("Error setting avatar, Please try again", toastOptions);
+            }
+        }
+    };
     useEffect(async () => {
         const data = [];
         for (let i = 0; i < 4; i++) {
@@ -35,26 +65,44 @@ export default function SetAvatar() {
     }, [])
     return (
         <>
-            <Container>
-                <div className="title-container">
-                    <h1>
-                        Pick an avatar as your profile picture
-                    </h1>
-                </div>
-                <div className="avatars">{
-                    avatars.map((avatar, index) => {
-                        return (
-                            <div
-                                key={index}
-                                className={`avatar ${selectedAvatar === index ? "selected" : ""} `}>
-                                <img src={`data:image/svg+xml;base64,${avatar}`} alt='avatar' onClick={() => selectedAvatar(index)} />
-                            </div>
-                        )
-                    })
-                };
-                </div>
-            </Container>
-            <ToastContainer />
+            {
+                //Is Loading digunakan untuk menfetching data jika data belum muncul
+                //loading keluar
+                isLoading ? (
+                    <Container>
+                        <img src={loader} alt="loader" className='loader' />
+                    </Container>
+                ) : (
+                    <Container>
+                        <div className="title-container">
+                            <h1>Pick an Avatar as your profile picture</h1>
+                        </div>
+                        <div className="avatars">
+                            {avatars.map((avatar, index) => {
+                                return (
+                                    <div
+                                        className={`avatar ${selectedAvatar === index ? "selected" : ""
+                                            }`}
+                                    >
+                                        <img
+                                            src={`data:image/svg+xml;base64,${avatar}`}
+                                            alt="avatar"
+                                            key={avatar}
+                                            onClick={() => setSelectedAvatar(index)}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <button onClick={setProfilePicture} className="submit-btn">
+                            Set as Profile Picture
+                        </button>
+                        <ToastContainer />
+                    </Container>
+                )
+            }
+
+
         </>
     );
 }
@@ -93,5 +141,23 @@ width: 100vw;
             transition: 0.5s ease-in-out;  
         }
     }
+    .selected{
+        border: 0.4rem solid #4e0eff;
+    }
 }
+.submit-btn{
+        background-color: #4e0eff;
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 0.4rem;
+        font-size: 1rem;
+        text-transform: uppercase;
+        transition:0.5s ease-in-out;
+        &:hover{
+            background-color: #4e0eff 
+        }
+    }
 `;
